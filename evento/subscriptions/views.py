@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.conf import settings
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.template.loader import render_to_string
@@ -8,27 +9,36 @@ from django.core import mail
 
 def subscribe(request):
     if request.method == 'POST':
-        form = SubscriptionForm(request.POST)
-
-        if form.is_valid():
-            body = render_to_string('subscriptions/subscription_email.txt',
-                                    form.cleaned_data)
-
-            mail.send_mail('Confirmação de inscrição',
-                            body,
-                            'mikaelle.rubia@outlook.com',
-                            ['mikaelle.rubia@outlook.com', form.cleaned_data['email']])
-                            #  corpo do email
-            messages.success(request, 'Inscrição realizada com sucesso!')
-
-            return HttpResponseRedirect('/inscricao/')
-        else:
-            return render(request, 'subscriptions/subscription_form.html', 
-            {'form': form})
+        return create(request)
 
     else:
-        context = {'form': SubscriptionForm()}
-        return render(request, 'subscriptions/subscription_form.html', context)
+        return new(request)
+
+
+def create(request):
+    form = SubscriptionForm(request.POST)
+
+    if not form.is_valid():
+        return render(request, 'subscriptions/subscription_form.html',
+                      {'form': form})
+    # send email
+    _send_email('subscriptions/subscription_email.txt', form.cleaned_data,
+                'Confirmação de inscrição', settings.DEFAULT_FROM_EMAIL, form.cleaned_data['email'])
+
+    # sucess feedback
+    messages.success(request, 'Inscrição realizada com sucesso!')
+
+    return HttpResponseRedirect('/inscricao/')
+
+
+def new(request):
+    return render(request, 'subscriptions/subscription_form.html',
+                  {'form': SubscriptionForm()})
+
+
+def _send_email(template_name, context, subject, from_, to):
+    body = render_to_string(template_name, context)
+    mail.send_mail(subject, body, from_, [from_, to])
 
 # MESSAGE = """
 # Olá! tudo bem?
@@ -43,7 +53,7 @@ def subscribe(request):
 # Email: mikaelle.rubia@outlook.com
 # Telefone: 73981164664
 
-# Em até 48 horas úteis, a nossa equipe entrará em 
+# Em até 48 horas úteis, a nossa equipe entrará em
 # contato com você para concluirmos a sua matrícula.
 
 # Atenciosamente,

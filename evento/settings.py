@@ -28,7 +28,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1','.localhost'] # configuração para o Not Found
 
-
+DEFAULT_FROM_EMAIL = 'mikaelle.rubia@outlook.com'
 # Application definition
 
 INSTALLED_APPS = [
