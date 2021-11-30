@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'evento.core.apps',
-    'evento.subscriptions',
+    'evento.subscriptions.apps.SubscriptionsConfig',
     
 ]
 

@@ -1,6 +1,5 @@
-from django.contrib import messages
 from django.conf import settings
-from django.http.response import HttpResponseRedirect
+from django.http.response import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from evento.subscriptions.forms import SubscriptionForm
@@ -22,21 +21,35 @@ def create(request):
     if not form.is_valid():
         return render(request, 'subscriptions/subscription_form.html',
                       {'form': form})
+
+    # passando os dados de form.cleaned_data para o create do banco
+    subscription = Subscription.objects.create(**form.cleaned_data)
+
     # send email
-    _send_email('subscriptions/subscription_email.txt', form.cleaned_data,
-                'Confirmação de inscrição', settings.DEFAULT_FROM_EMAIL, form.cleaned_data['email'])
+    _send_email('subscriptions/subscription_email.txt', {'subscription': subscription},
+                'Confirmação de inscrição', settings.DEFAULT_FROM_EMAIL, subscription.email)
 
-    Subscription.objects.create(**form.cleaned_data)# passando os dados de form.cleaned_data para o create do banco
-    
-    # sucess feedback
-    messages.success(request, 'Inscrição realizada com sucesso!')
-
-    return HttpResponseRedirect('/inscricao/')
+    return HttpResponseRedirect('/inscricao/{}/'.format(subscription.pk))
 
 
 def new(request):
     return render(request, 'subscriptions/subscription_form.html',
                   {'form': SubscriptionForm()})
+
+
+def detail(request, pk):
+    try:
+        subscription = Subscription.objects.get(pk=pk)
+        # subscription = Subscription(
+        #     name='Mikaelle Rubia Pinheiro Sousa',
+        #     cpf='05792803579',
+        #     email='mikaelle.rubia@outlook.com',
+        #     phone='73981164664'
+        # )
+    except Subscription.DoesNotExist:
+        raise Http404
+    return render(request, 'subscriptions/subscription_detail.html',
+                  {'subscription': subscription})
 
 
 def _send_email(template_name, context, subject, from_, to):
