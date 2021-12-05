@@ -5,11 +5,11 @@ from evento.subscriptions.models import Subscription
 
 class SubscriptionModelAdmin(admin.ModelAdmin):
     list_display = ('name', 'email', 'phone', 'cpf', 'created_at',
-                    'subscribed_today')
+                    'subscribed_today', 'paid')
     # as colunas de deseja
     date_hierarchy = 'created_at'
     search_fields = ('name', 'email', 'phone', 'cpf', 'created_at')
-    list_filter = ('created_at',)
+    list_filter = ('paid', 'created_at',)
 
     def subscribed_today(self, obj):
         return obj.created_at == now().date()
