@@ -13,12 +13,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
-import evento.core.views
 
+from django.urls import path
+from evento.subscriptions.views import new, detail
+
+app_name = 'subscriptions'
 urlpatterns = [
-    path('', evento.core.views.home, name='home'),
-    path('inscricao/', include('evento.subscriptions.urls')),
-    path('admin/', admin.site.urls),
+    path('', new, name='new'),
+    path('<int:pk>/', detail, name='detail'),
+
 ]

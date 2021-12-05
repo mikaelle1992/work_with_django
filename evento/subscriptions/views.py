@@ -5,14 +5,19 @@ from django.template.loader import render_to_string
 from evento.subscriptions.forms import SubscriptionForm
 from django.core import mail
 from evento.subscriptions.models import Subscription
+from django.shortcuts import resolve_url as r
 
 
-def subscribe(request):
+def new(request):
     if request.method == 'POST':
         return create(request)
 
-    else:
-        return new(request)
+    return empty_form(request)
+
+
+def empty_form(request):
+    return render(request, 'subscriptions/subscription_form.html',
+                  {'form': SubscriptionForm()})
 
 
 def create(request):
@@ -29,12 +34,7 @@ def create(request):
     _send_email('subscriptions/subscription_email.txt', {'subscription': subscription},
                 'Confirmação de inscrição', settings.DEFAULT_FROM_EMAIL, subscription.email)
 
-    return HttpResponseRedirect('/inscricao/{}/'.format(subscription.pk))
-
-
-def new(request):
-    return render(request, 'subscriptions/subscription_form.html',
-                  {'form': SubscriptionForm()})
+    return HttpResponseRedirect(r('subscriptions:detail', subscription.pk))
 
 
 def detail(request, pk):
