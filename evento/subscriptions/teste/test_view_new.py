@@ -2,7 +2,7 @@ from django.test import TestCase
 from evento.subscriptions.forms import SubscriptionForm
 from django.core import mail
 from evento.subscriptions.models import Subscription
-from django.shortcuts import resolve_url as r 
+from django.shortcuts import resolve_url as r
 
 
 class SubscriptionsNewGet(TestCase):
@@ -15,7 +15,8 @@ class SubscriptionsNewGet(TestCase):
 
     def test_template(self):
         """Must use subscriptions/subscription_form.html """
-        self.assertTemplateUsed(self.resp, 'subscriptions/subscription_form.html')
+        self.assertTemplateUsed(
+            self.resp, 'subscriptions/subscription_form.html')
 
     def test_html(self):
         """Html must contain input tags"""
@@ -48,7 +49,8 @@ class SubscriptionsNewGet(TestCase):
     def test_has_fields(self):
         """Context must have 4 fields"""
         form = self.resp.context['form']
-        self.assertSequenceEqual(['name', 'cpf', 'email', 'phone'], list(form.fields))
+        self.assertSequenceEqual(
+            ['name', 'cpf', 'email', 'phone'], list(form.fields))
 
 
 class SubscriptionsNewGetPostValid(TestCase):
@@ -61,7 +63,7 @@ class SubscriptionsNewGetPostValid(TestCase):
     def test_get(self):
         """Valid POST should redirect to /inscricao/1/"""
         self.assertRedirects(self.resp, r('subscriptions:detail', 1))
-    
+
     def test_send_subscribe_email(self):
         self.assertEqual(1, len(mail.outbox))
         # outbox guarda a lista de emails enviados
@@ -70,18 +72,18 @@ class SubscriptionsNewGetPostValid(TestCase):
         self.assertTrue(Subscription.objects.exists())
 
 
-
 class SubscriptionsNewGetInvalidPost(TestCase):
     # Email invalido
     def setUp(self):
         self.response = self.client.post(r('subscriptions:new'), {})
 
     def test_post(self):
-        """"Invalid POST should not redirect"""     
+        """"Invalid POST should not redirect"""
         self.assertEqual(200, self.response.status_code)
-    
+
     def test_template(self):
-        self.assertTemplateUsed(self.response, 'subscriptions/subscription_form.html')
+        self.assertTemplateUsed(
+            self.response, 'subscriptions/subscription_form.html')
 
     def test_has_form(self):
         form = self.response.context['form']
@@ -95,5 +97,11 @@ class SubscriptionsNewGetInvalidPost(TestCase):
         self.assertFalse(Subscription.objects.exists())
 
 
+class TemplateRegressionTest(TestCase):
+    def test_template_has_non_field_erros(self):
+        invalid_data = dict(
+            name='Mikaelle Rubia Pinheiro Sousa', cpf='05792803579')
+        response = self.client.post(r('subscriptions:new'), invalid_data)
 
-    
+        self.assertContains(response, '<ul class="errorlist nonfield">')
+        
