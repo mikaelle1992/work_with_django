@@ -20,7 +20,6 @@ class SubscriptionFormTest(TestCase):
         erros = form.errors
         erros_list = erros[fields]
         self.assertListEqual([msg], erros_list)
-        
 
     def test_cpf_has_11_digits(self):
         """CPF must have 11 digits"""
@@ -44,3 +43,10 @@ class SubscriptionFormTest(TestCase):
         form.is_valid()
 
         return form
+
+    def test_name_must_be_capitalized(self):
+        """Name must be capitalized"""
+        """MIKAELLE -> Mikaelle"""
+        form = self.make_validet_form(name="MIKAELLE Rubia Pinheiro Sousa")
+        self.assertEqual("Mikaelle Rubia Pinheiro Sousa",
+                         form.cleaned_data["name"])
